@@ -1,0 +1,18 @@
+{
+    "manifest_version": 3,
+    "name": "Robinhood PnL Tracker",
+    "version": "2.0.0",
+    "description": "Beautiful PnL tracking with calendar visualization. Supports mock data, CSV import, and future Robinhood API integration.",
+    "action": {
+      "default_title": "Robinhood PnL Tracker",
+      "default_popup": "popup.html"
+    },
+    "permissions": [
+      "storage",
+      "activeTab"
+    ],
+    "host_permissions": [
+      "https://api.robinhood.com/*"
+    ]
+  }
+  

@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Robinhood PnL Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23111827'/%3E%3Cpath fill='%238b5cf6' d='M16 36c0-8.84 7.16-16 16-16c4.08 0 7.9 1.54 10.77 4.05l3.44-3.44C42.19 17.8 37.3 16 32 16c-11.05 0-20 8.95-20 20v12h12c11.05 0 20-8.95 20-20c0-5.3-1.8-10.19-4.61-14.21l-3.44 3.44C38.46 19.1 40 22.92 40 27c0 8.84-7.16 16-16 16H16z'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+      <div class="nav-brand">
+        <div class="brand-icon">📈</div>
+        <div class="brand-text">
+          <h1>PnL Tracker</h1>
+          <span class="brand-subtitle">Professional Trading Analytics</span>
+        </div>
+      </div>
+      
+      <div class="nav-controls">
+        <div class="quick-actions">
+          <button class="action-btn" id="refreshBtn" title="Refresh Data">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23,4 23,10 17,10"></polyline>
+              <polyline points="1,20 1,14 7,14"></polyline>
+              <path d="M20.49,9A9,9,0,0,0,5.64,5.64L1,10m22,4L18.36,18.36A9,9,0,0,1,3.51,15"></path>
+            </svg>
+          </button>
+          <div class="export-dropdown">
+            <button class="action-btn" id="exportBtn" title="Export Data">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21,15v4a2,2,0,0,1-2,2H5a2,2,0,0,1-2-2V15"></path>
+                <polyline points="7,10 12,15 17,10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </button>
+            <div class="export-menu">
+              <button id="importCSVBtn" class="export-option">
+                <span class="export-icon">📥</span>
+                <span class="export-text">Import CSV</span>
+              </button>
+              <button id="exportCSVBtn" class="export-option">
+                <span class="export-icon">📄</span>
+                <span class="export-text">Export CSV</span>
+              </button>
+              <button id="exportPDFBtn" class="export-option">
+                <span class="export-icon">📋</span>
+                <span class="export-text">Export PDF</span>
+              </button>
+              <button id="printReportBtn" class="export-option">
+                <span class="export-icon">🖨️</span>
+                <span class="export-text">Print Report</span>
+              </button>
+            </div>
+          </div>
+          <button class="action-btn" id="settingsBtn" title="Settings">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4,15a1.65,1.65,0,0,0,.33,1.82l.06.06a2,2,0,0,1,0,2.83,2,2,0,0,1-2.83,0l-.06-.06a1.65,1.65,0,0,0-1.82-.33,1.65,1.65,0,0,0-1,1.51V21a2,2,0,0,1-2,2,2,2,0,0,1-2-2V19.41a1.65,1.65,0,0,0-1-1.51,1.65,1.65,0,0,0-1.82.33l-.06.06a2,2,0,0,1-2.83,0,2,2,0,0,1,0-2.83l.06-.06a1.65,1.65,0,0,0,.33-1.82,1.65,1.65,0,0,0-1.51-1H3a2,2,0,0,1-2-2,2,2,0,0,1,2-2H4.58a1.65,1.65,0,0,0,1.51-1,1.65,1.65,0,0,0-.33-1.82l-.06-.06a2,2,0,0,1,0-2.83,2,2,0,0,1,2.83,0l.06.06a1.65,1.65,0,0,0,1.82.33H9a1.65,1.65,0,0,0,1,1.51V3a2,2,0,0,1,2-2,2,2,0,0,1,2,2V4.58a1.65,1.65,0,0,0,1,1.51,1.65,1.65,0,0,0,1.82-.33l.06-.06a2,2,0,0,1,2.83,0,2,2,0,0,1,0,2.83l-.06.06a1.65,1.65,0,0,0-.33,1.82V9a1.65,1.65,0,0,0,1.51,1H21a2,2,0,0,1,2,2,2,2,0,0,1-2,2H19.41A1.65,1.65,0,0,0,17.9,15.49Z"></path>
+            </svg>
+          </button>
+          <button class="action-btn" id="themeToggleBtn" title="Toggle theme">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          </button>
+        </div>
+        
+        <div class="view-toggle">
+          <button class="toggle-btn active" data-view="calendar">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Calendar
+          </button>
+          <button class="toggle-btn premium-feature" data-view="analytics">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18,20V10"></path>
+              <path d="M12,20V4"></path>
+              <path d="M6,20v-6"></path>
+            </svg>
+            Analytics
+          </button>
+          <button class="toggle-btn premium-feature" data-view="portfolio">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21,16V8a2,2,0,0,0-1-1.73l-7-4a2,2,0,0,0-2,0l-7,4A2,2,0,0,0,3,8v8a2,2,0,0,0,1,1.73l7,4a2,2,0,0,0,2,0l7-4A2,2,0,0,0,21,16Z"></path>
+              <polyline points="3.27,6.96 12,12.01 20.73,6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+            Portfolio
+          </button>
+        </div>
+
+        <div id="accountBadge">
+          <div id="accountInfo">
+            <span id="accountEmail"></span>
+            <span id="accountPlan">free</span>
+            <button id="applyCouponBtn" class="action-btn" title="Apply coupon">🏷️</button>
+            <button id="upgradeBtn" class="action-btn" title="Upgrade">⚡</button>
+            <button id="manageBillingBtn" class="action-btn" title="Manage billing">🧾</button>
+            <button id="signOutBtn" class="action-btn" title="Sign out">🚪</button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <!-- Quick Stats -->
+        <div class="stats-card">
+          <h3>Today's Performance</h3>
+          <div class="stat-row">
+            <span class="stat-label">P&L</span>
+            <span id="todayPnl" class="stat-value positive">+$0.00</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Trades</span>
+            <span id="todayTrades" class="stat-value">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Win Rate</span>
+            <span id="todayWinRate" class="stat-value">0%</span>
+          </div>
+        </div>
+
+        <!-- Monthly Summary -->
+        <div class="monthly-card">
+          <h3>This Month</h3>
+          <div class="monthly-pnl">
+            <span id="monthlyPnl" class="monthly-value">+$0.00</span>
+            <span id="monthlyChange" class="monthly-change">+0.00%</span>
+          </div>
+          <div class="monthly-total">
+            <div class="total-label">Total P&L</div>
+            <div id="monthlyTotalPnl" class="total-value">+$0.00</div>
+          </div>
+          <div class="monthly-stats">
+            <div class="month-stat">
+              <span class="month-label">Best Day</span>
+              <span id="monthBestDay" class="month-value">—</span>
+            </div>
+            <div class="month-stat">
+              <span class="month-label">Worst Day</span>
+              <span id="monthWorstDay" class="month-value">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Controls -->
+        <div class="controls-card">
+          <h3>Display Settings</h3>
+          
+          <!-- View Mode Toggle -->
+          <div class="control-section">
+            <div class="control-label">View Mode</div>
+            <div class="toggle-group">
+              <button class="toggle-option active" data-value="percent">
+                <span class="toggle-icon">%</span>
+                <span class="toggle-text">Percentage</span>
+              </button>
+              <button class="toggle-option" data-value="dollar">
+                <span class="toggle-icon">$</span>
+                <span class="toggle-text">Dollar</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Privacy Mode Toggle -->
+          <div class="control-section">
+            <div class="control-label">Privacy</div>
+            <div class="toggle-group">
+              <button class="toggle-option active" data-value="show">
+                <span class="toggle-icon">👁️</span>
+                <span class="toggle-text">Show</span>
+              </button>
+              <button class="toggle-option" data-value="hide">
+                <span class="toggle-icon">🙈</span>
+                <span class="toggle-text">Hide</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- P&L Type Toggle -->
+          <div class="control-section">
+            <div class="control-label">P&L Type</div>
+            <div class="toggle-group">
+              <button class="toggle-option active" data-value="gross">
+                <span class="toggle-icon">📈</span>
+                <span class="toggle-text">Gross</span>
+              </button>
+              <button class="toggle-option" data-value="net">
+                <span class="toggle-icon">📊</span>
+                <span class="toggle-text">Net</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance Chart -->
+        <div class="chart-card">
+          <h3>Performance Trend</h3>
+          <div id="miniChart" class="mini-chart">
+            <div id="chartLine" class="chart-line"></div>
+          </div>
+        </div>
+
+        <!-- Portfolio Performance -->
+        <div class="performance-card">
+          <h3>Portfolio Performance</h3>
+          
+          <div class="performance-grid">
+            <div class="perf-item">
+              <div class="perf-label">Total P&L</div>
+              <div id="totalPnl" class="perf-value">+0.00%</div>
+            </div>
+            
+            <div class="perf-item">
+              <div class="perf-label">Trading Days</div>
+              <div id="tradingDays" class="perf-value">0</div>
+            </div>
+            
+            <div class="perf-item">
+              <div class="perf-label">Win Rate</div>
+              <div id="winRate" class="perf-value">0%</div>
+            </div>
+            
+            <div class="perf-item">
+              <div class="perf-label">Best Day</div>
+              <div id="bestDay" class="perf-value">—</div>
+            </div>
+            
+            <div class="perf-item">
+              <div class="perf-label">Worst Day</div>
+              <div id="worstDay" class="perf-value">—</div>
+            </div>
+            
+            <div class="perf-item">
+              <div class="perf-label">Avg Daily</div>
+              <div id="avgDaily" class="perf-value">—</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main View Area -->
+      <div class="view-area">
+        <!-- Calendar View -->
+        <div id="calendarView" class="view-panel active">
+          <div class="calendar-header">
+            <button id="prevMonth" class="nav-btn" aria-label="Previous month">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15,18 9,12 15,6"></polyline>
+              </svg>
+            </button>
+            <div class="month-label" id="monthLabel">June 2024</div>
+            <button id="nextMonth" class="nav-btn" aria-label="Next month">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9,18 15,12 9,6"></polyline>
+              </svg>
+            </button>
+          </div>
+
+          <div class="chip-group" id="calendarFilters">
+            <button class="chip active" data-filter="all">All</button>
+            <button class="chip" data-filter="positive">Wins</button>
+            <button class="chip" data-filter="negative">Losses</button>
+            <button class="chip" data-filter="neutral">Neutral</button>
+            <button class="chip" data-filter="trading">With Trades</button>
+          </div>
+
+          <div class="calendar">
+            <div class="weekdays">
+              <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
+            <div id="daysGrid" class="days-grid">
+              <!-- days will be injected here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics View -->
+        <div id="analyticsView" class="view-panel">
+          <div class="analytics-header">
+            <h2>Advanced Analytics</h2>
+            <div class="analytics-controls">
+              <select id="analyticsPeriod" class="control-select">
+                <option value="7">Last 7 Days</option>
+                <option value="30">Last 30 Days</option>
+                <option value="90">Last 90 Days</option>
+                <option value="365">Last Year</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="analytics-grid">
+            <div class="analytics-card">
+              <h3>Profit/Loss Distribution</h3>
+              <div id="pnlDistribution" class="chart-container">
+                <div class="chart-placeholder">Chart will appear here</div>
+              </div>
+            </div>
+            
+            <div class="analytics-card">
+              <h3>Trading Volume</h3>
+              <div id="volumeChart" class="chart-container">
+                <div class="chart-placeholder">Volume chart will appear here</div>
+              </div>
+            </div>
+            
+            <div class="analytics-card">
+              <h3>Win/Loss Streaks</h3>
+              <div id="streakStats" class="streak-stats">
+                <div class="streak-item">
+                  <span class="streak-label">Current Streak</span>
+                  <span id="currentStreak" class="streak-value">0 days</span>
+                </div>
+                <div class="streak-item">
+                  <span class="streak-label">Best Streak</span>
+                  <span id="bestStreak" class="streak-value">0 days</span>
+                </div>
+                <div class="streak-item">
+                  <span class="streak-label">Worst Streak</span>
+                  <span id="worstStreak" class="streak-value">0 days</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="analytics-card">
+              <h3>Risk Metrics</h3>
+              <div class="risk-metrics">
+                <div class="risk-item">
+                  <span class="risk-label">Max Drawdown</span>
+                  <span id="maxDrawdown" class="risk-value">0%</span>
+                </div>
+                <div class="risk-item">
+                  <span class="risk-label">Sharpe Ratio</span>
+                  <span id="sharpeRatio" class="risk-value">0.00</span>
+                </div>
+                <div class="risk-item">
+                  <span class="risk-label">Volatility</span>
+                  <span id="volatility" class="risk-value">0%</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="analytics-card">
+              <h3>Performance Insights</h3>
+              <div class="insights-container">
+                <div class="insight-item">
+                  <span class="insight-icon">📊</span>
+                  <span class="insight-text">Average Daily Return</span>
+                  <span id="avgDailyReturn" class="insight-value">+0.00%</span>
+                </div>
+                <div class="insight-item">
+                  <span class="insight-icon">🎯</span>
+                  <span class="insight-text">Consistency Score</span>
+                  <span id="consistencyScore" class="insight-value">0/100</span>
+                </div>
+                <div class="insight-item">
+                  <span class="insight-icon">📈</span>
+                  <span class="insight-text">Best Trading Day</span>
+                  <span id="bestTradingDay" class="insight-value">—</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="analytics-card">
+              <h3>Market Analysis</h3>
+              <div class="market-analysis">
+                <div class="market-item">
+                  <span class="market-label">Most Traded Symbol</span>
+                  <span id="mostTradedSymbol" class="market-value">—</span>
+                </div>
+                <div class="market-item">
+                  <span class="market-label">Total Volume</span>
+                  <span id="totalVolume" class="market-value">$0</span>
+                </div>
+                <div class="market-item">
+                  <span class="market-label">Active Trading Days</span>
+                  <span id="activeTradingDays" class="market-value">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Portfolio View -->
+        <div id="portfolioView" class="view-panel">
+          <div class="portfolio-header">
+            <h2>Portfolio Overview</h2>
+            <div class="portfolio-controls">
+              <button class="btn-primary" id="addTradeBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add Trade
+              </button>
+            </div>
+          </div>
+          
+          <div class="portfolio-grid">
+            <div class="portfolio-card">
+              <h3>Recent Trades</h3>
+              <div id="recentTrades" class="trades-list">
+                <div class="trade-item">
+                  <div class="trade-symbol">AAPL</div>
+                  <div class="trade-details">
+                    <div class="trade-pnl positive">+$125.50</div>
+                    <div class="trade-date">Today</div>
+                  </div>
+                </div>
+                <div class="trade-item">
+                  <div class="trade-symbol">TSLA</div>
+                  <div class="trade-details">
+                    <div class="trade-pnl negative">-$89.25</div>
+                    <div class="trade-date">Yesterday</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="portfolio-card">
+              <h3>Top Performers</h3>
+              <div id="topPerformers" class="performers-list">
+                <div class="performer-item">
+                  <span class="performer-symbol">AAPL</span>
+                  <span class="performer-pnl positive">+$1,250</span>
+                </div>
+                <div class="performer-item">
+                  <span class="performer-symbol">MSFT</span>
+                  <span class="performer-pnl positive">+$890</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="portfolio-card">
+              <h3>Asset Allocation</h3>
+              <div id="assetAllocation" class="allocation-chart">
+                <div class="allocation-item">
+                  <div class="allocation-bar">
+                    <div class="allocation-fill" style="width: 40%"></div>
+                  </div>
+                  <span class="allocation-label">Stocks (40%)</span>
+                </div>
+                <div class="allocation-item">
+                  <div class="allocation-bar">
+                    <div class="allocation-fill" style="width: 30%"></div>
+                  </div>
+                  <span class="allocation-label">Options (30%)</span>
+                </div>
+                <div class="allocation-item">
+                  <div class="allocation-bar">
+                    <div class="allocation-fill" style="width: 20%"></div>
+                  </div>
+                  <span class="allocation-label">Crypto (20%)</span>
+                </div>
+                <div class="allocation-item">
+                  <div class="allocation-bar">
+                    <div class="allocation-fill" style="width: 10%"></div>
+                  </div>
+                  <span class="allocation-label">Other (10%)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Tooltip -->
+  <div id="tooltip" class="tooltip"></div>
+
+  <!-- Notification System -->
+  <div id="notificationContainer" style="position: fixed; top: 20px; right: 20px; z-index: 3000;"></div>
+
+  <!-- Settings Modal (hidden by default) -->
+  <div id="settingsModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <h3 style="margin: 0 0 16px 0; color: var(--text-primary);">Settings</h3>
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 14px;">Data Source:</label>
+        <select id="dataSource" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--bg-tertiary); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary);">
+          <option value="mock">Mock Data (Demo)</option>
+          <option value="csv">CSV Import</option>
+          <option value="api">Robinhood API (Coming Soon)</option>
+        </select>
+      </div>
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 14px;">Currency:</label>
+        <select id="currency" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--bg-tertiary); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary);">
+          <option value="USD">USD ($)</option>
+          <option value="EUR">EUR (€)</option>
+          <option value="GBP">GBP (£)</option>
+        </select>
+      </div>
+      
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 14px;">Theme:</label>
+        <select id="theme" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--bg-tertiary); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary);">
+          <option value="dark">Dark Theme</option>
+          <option value="light">Light Theme</option>
+          <option value="auto">Auto (System)</option>
+        </select>
+      </div>
+      
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 14px;">Export Data:</label>
+        <div style="display: flex; gap: 8px;">
+          <button id="exportCSV" style="flex: 1; padding: 8px; background: var(--gradient-success); border: none; color: white; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
+            📊 Export CSV
+          </button>
+          <button id="exportPDF" style="flex: 1; padding: 8px; background: var(--gradient-danger); border: none; color: white; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
+            📄 Export PDF
+          </button>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; justify-content: flex-end;">
+        <button id="closeSettings" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: var(--text-secondary); border-radius: 6px; cursor: pointer;">Cancel</button>
+        <button id="saveSettings" style="padding: 8px 16px; background: var(--gradient-primary); border: none; color: white; border-radius: 6px; cursor: pointer;">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Access Overlay (Email + Coupon) -->
+  <div id="accessOverlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 4000; display: none; align-items: center; justify-content: center;">
+    <div class="modal-content" style="max-width: 480px; width: 92%;">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+        <div style="font-size: 22px;">🔒</div>
+        <div>
+          <div style="font-weight: 800; color: var(--text-primary); font-size: 18px;">Sign in to access PnL Tracker</div>
+          <div style="color: var(--text-secondary); font-size: 12px;">Enter your email. Optional: add a coupon to unlock premium.</div>
+        </div>
+      </div>
+      <form id="accessForm" style="display: grid; gap: 10px;">
+        <div>
+          <label for="accessEmail" style="display:block; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">Email</label>
+          <input id="accessEmail" type="email" placeholder="you@example.com" required style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: var(--bg-tertiary); color: var(--text-primary);">
+        </div>
+        <div>
+          <label for="accessCoupon" style="display:block; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px;">Coupon (optional)</label>
+          <input id="accessCoupon" type="text" placeholder="Enter coupon code" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: var(--bg-tertiary); color: var(--text-primary); text-transform: uppercase;">
+        </div>
+        <button id="accessSubmit" type="submit" class="btn-primary">Continue</button>
+        <div id="accessError" style="display:none; color:#fecaca; background:#7f1d1d; border:1px solid #ef4444; padding:8px 10px; border-radius:8px; font-size:12px;"></div>
+        <div style="font-size: 11px; color: var(--text-secondary); text-align: center;">By continuing, you agree to the Terms. We only store your email locally to recognize your access.</div>
+      </form>
+    </div>
+  </div>
+
+    <!-- Hidden file input for CSV import -->
+    <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+    
+    <!-- PDF Export Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    
+    <script src="app.js"></script>
+  </body>
+</html>

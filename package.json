@@ -1,0 +1,17 @@
+{
+  "name": "pnl-tracker",
+  "version": "1.0.0",
+  "description": "Professional P&L Trading Tracker",
+  "main": "index.html",
+  "scripts": {
+    "start": "python server.py",
+    "deploy": "node deploy.js",
+    "build": "node deploy.js"
+  },
+  "keywords": ["trading", "pnl", "tracker", "finance"],
+  "author": "Mahmood Ahmad",
+  "license": "MIT",
+  "devDependencies": {
+    "surge": "^0.23.7"
+  }
+}

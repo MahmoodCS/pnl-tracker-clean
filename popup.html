@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Robinhood PnL Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23111827'/%3E%3Cpath fill='%238b5cf6' d='M16 36c0-8.84 7.16-16 16-16c4.08 0 7.9 1.54 10.77 4.05l3.44-3.44C42.19 17.8 37.3 16 32 16c-11.05 0-20 8.95-20 20v12h12c11.05 0 20-8.95 20-20c0-5.3-1.8-10.19-4.61-14.21l-3.44 3.44C38.46 19.1 40 22.92 40 27c0 8.84-7.16 16-16 16H16z'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <!-- Header Controls -->
+    <div class="header-controls">
+      <div class="control-group">
+        <label>P&L Type</label>
+        <select id="pnlType" class="control-select">
+          <option value="gross">Gross</option>
+          <option value="net">Net</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>View Mode</label>
+        <select id="viewMode" class="control-select">
+          <option value="percent">% Value</option>
+          <option value="dollar">$ Value</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Report Type</label>
+        <select id="reportType" class="control-select">
+          <option value="aggregate">Aggregate P&L</option>
+          <option value="daily">Daily P&L</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Privacy Mode</label>
+        <select id="privacyMode" class="control-select">
+          <option value="show">Show Values</option>
+          <option value="hide">Hide Values</option>
+        </select>
+      </div>
+      <div class="control-group" id="accountBadge" style="display:none; align-items: center; gap: 6px; justify-content: flex-end; flex: 1;">
+        <label>Account</label>
+        <div id="accountInfo" style="display:flex; align-items:center; gap:4px; background: var(--gradient-glass); padding:6px 8px; border-radius:8px; font-size:11px; color: var(--text-secondary); flex-wrap: wrap;">
+          <span id="accountEmail" style="font-weight:700; color: var(--text-primary); white-space: nowrap;"></span>
+          <span id="accountPlan" style="padding:2px 6px; border-radius:6px; background: var(--bg-tertiary); color: var(--text-secondary); font-size:10px;"></span>
+          <button id="applyCouponBtn" title="Apply coupon" style="border:none; background: var(--gradient-primary); color:white; border-radius:6px; padding:4px 6px; cursor:pointer; font-size:10px;">Coupon</button>
+          <button id="upgradeBtn" title="Upgrade" style="border:none; background: var(--gradient-success); color:white; border-radius:6px; padding:4px 6px; cursor:pointer; font-size:10px;">Upgrade</button>
+          <button id="manageBillingBtn" title="Manage billing" style="border:none; background: var(--gradient-glass); color: var(--text-primary); border-radius:6px; padding:4px 6px; cursor:pointer; font-size:10px;">Billing</button>
+          <button id="signOutBtn" title="Sign out" style="border:1px solid rgba(255,255,255,0.2); background: transparent; color: var(--text-secondary); border-radius:6px; padding:4px 6px; cursor:pointer; font-size:10px;">Sign out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+      <button class="tab-btn" data-tab="recent">Recent</button>
+      <button class="tab-btn" data-tab="year">Year/Month/Day</button>
+      <button class="tab-btn active" data-tab="calendar">Calendar</button>
+      <div class="year-selector">
+        <button id="yearBtn" class="year-btn">2024</button>
+      </div>
+    </div>
+
+    <div class="calendar-wrap">
+      <header class="calendar-header">
+        <button id="prevMonth" class="nav-btn" aria-label="Previous month">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15,18 9,12 15,6"></polyline>
+          </svg>
+        </button>
+        <div class="month-label" id="monthLabel">June 2024</div>
+        <button id="nextMonth" class="nav-btn" aria-label="Next month">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9,18 15,12 9,6"></polyline>
+          </svg>
+        </button>
+      </header>
+
+      <!-- Monthly P&L Summary -->
+      <div class="monthly-summary">
+        <span class="summary-label">Monthly P&L:</span>
+        <span id="monthlyPnl" class="summary-value">+$0.00</span>
+      </div>
+
+      <div class="calendar">
+        <div class="calendar-main">
+          <div class="weekdays">
+            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+          </div>
+          <div id="daysGrid" class="days-grid">
+            <!-- days will be injected here -->
+          </div>
+        </div>
+        <div class="weekly-totals">
+          <div class="total-header">Total</div>
+          <div id="weeklyTotals" class="weekly-totals-grid">
+            <!-- weekly totals will be injected here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="stats-panel">
+      <h3>Portfolio Performance</h3>
+      
+      <div class="stat-item">
+        <div class="stat-label">Total PnL</div>
+        <div id="totalPnl" class="stat-value">+0.00%</div>
+      </div>
+      
+      <div class="stat-item">
+        <div class="stat-label">Trading Days</div>
+        <div id="tradingDays" class="stat-value">0</div>
+      </div>
+      
+      <div class="stat-item">
+        <div class="stat-label">Win Rate</div>
+        <div id="winRate" class="stat-value">0%</div>
+      </div>
+      
+      <div class="stat-item">
+        <div class="stat-label">Best Day</div>
+        <div id="bestDay" class="stat-value">—</div>
+      </div>
+      
+      <div class="stat-item">
+        <div class="stat-label">Worst Day</div>
+        <div id="worstDay" class="stat-value">—</div>
+      </div>
+      
+      <div class="stat-item" style="flex-direction: column; align-items: flex-start;">
+        <div class="stat-label" style="margin-bottom: 8px;">Performance Trend</div>
+        <div id="miniChart" style="width: 100%; height: 40px; background: var(--gradient-glass); border-radius: 6px; position: relative; overflow: hidden;">
+          <div id="chartLine" style="position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--gradient-primary);"></div>
+        </div>
+      </div>
+      
+      <div class="stat-footer">
+        <div style="margin-bottom: 8px;">
+          <strong>💡 Pro Tip:</strong> Click on any day to view detailed trade information.
+        </div>
+        <div>
+          <button id="settingsBtn" style="background: var(--gradient-primary); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
+            ⚙️ Settings
+          </button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Tooltip -->
+  <div id="tooltip" class="tooltip"></div>
+
+  <!-- Notification System -->
+  <div id="notificationContainer" style="position: fixed; top: 20px; right: 20px; z-index: 3000;"></div>
+
+  <!-- Settings Modal (hidden by default) -->
+  <div id="settingsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+    <div style="background: var(--bg-card); padding: 24px; border-radius: 12px; max-width: 400px; width: 90%;">
+      <h3 style="margin: 0 0 16px 0; color: var(--text-primary);">Settings</h3>
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 14px;">Data Source:</label>
+        <select id="dataSource" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--bg-tertiary); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary);">
+          <option value="mock">Mock Data (Demo)</option>
+          <option value="csv">CSV Import</option>
+          <option value="api">Robinhood API (Coming Soon)</option>
+        </select>
+      </div>
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 14px;">Currency:</label>
+        <select id="currency" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--bg-tertiary); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary);">
+          <option value="USD">USD ($)</option>
+          <option value="EUR">EUR (€)</option>
+          <option value="GBP">GBP (£)</option>
+        </select>
+      </div>
+      
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 14px;">Theme:</label>
+        <select id="theme" style="width: 100%; padding: 8px; border-radius: 6px; background: var(--bg-tertiary); border: 1px solid rgba(255,255,255,0.1); color: var(--text-primary);">
+          <option value="dark">Dark Theme</option>
+          <option value="light">Light Theme</option>
+          <option value="auto">Auto (System)</option>
+        </select>
+      </div>
+      
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 14px;">Export Data:</label>
+        <div style="display: flex; gap: 8px;">
+          <button id="exportCSV" style="flex: 1; padding: 8px; background: var(--gradient-success); border: none; color: white; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
+            📊 Export CSV
+          </button>
+          <button id="exportPDF" style="flex: 1; padding: 8px; background: var(--gradient-danger); border: none; color: white; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
+            📄 Export PDF
+          </button>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; justify-content: flex-end;">
+        <button id="closeSettings" style="padding: 8px 16px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: var(--text-secondary); border-radius: 6px; cursor: pointer;">Cancel</button>
+        <button id="saveSettings" style="padding: 8px 16px; background: var(--gradient-primary); border: none; color: white; border-radius: 6px; cursor: pointer;">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Access Overlay (Email + Coupon) -->
+  <div id="accessOverlay" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 4000; display: none; align-items: center; justify-content: center;">
+    <div style="background: var(--bg-card, #0f172a); width: 92%; max-width: 420px; border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08);">
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+        <div style="font-size: 20px;">🔒</div>
+        <div>
+          <div style="font-weight: 700; color: var(--text-primary, #fff); font-size: 16px;">Sign in to access PnL Tracker</div>
+          <div style="color: var(--text-secondary, #cbd5e1); font-size: 12px;">Enter your email. Optional: add a coupon to unlock premium.</div>
+        </div>
+      </div>
+      <form id="accessForm" style="display: grid; gap: 10px;">
+        <div>
+          <label for="accessEmail" style="display:block; font-size: 12px; color: var(--text-secondary, #cbd5e1); margin-bottom: 6px;">Email</label>
+          <input id="accessEmail" type="email" placeholder="you@example.com" required style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: var(--bg-tertiary, #0b1220); color: var(--text-primary, #fff);">
+        </div>
+        <div>
+          <label for="accessCoupon" style="display:block; font-size: 12px; color: var(--text-secondary, #cbd5e1); margin-bottom: 6px;">Coupon (optional)</label>
+          <input id="accessCoupon" type="text" placeholder="Enter coupon code" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: var(--bg-tertiary, #0b1220); color: var(--text-primary, #fff); text-transform: uppercase;">
+        </div>
+        <button id="accessSubmit" type="submit" style="margin-top: 4px; padding: 10px 12px; border-radius: 8px; background: var(--gradient-primary, linear-gradient(135deg,#8b5cf6,#6366f1)); color: white; font-weight: 700; border: none; cursor: pointer;">Continue</button>
+        <div id="accessError" style="display:none; color:#fecaca; background:#7f1d1d; border:1px solid #ef4444; padding:8px 10px; border-radius:8px; font-size:12px;"></div>
+        <div style="font-size: 11px; color: var(--text-secondary, #94a3b8); text-align: center;">By continuing, you agree to the Terms. We only store your email locally to recognize your access.</div>
+      </form>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
